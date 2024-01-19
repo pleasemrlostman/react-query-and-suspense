@@ -1,11 +1,12 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 
 const config = {
-  // baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_FAKE_JSON_STORE_URL,
 };
 const api = axios.create(config);
 
 const responseHandler = (response: AxiosResponse) => {
+
   return response;
 };
 

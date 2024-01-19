@@ -1,5 +1,5 @@
 import { api } from "@/api";
-import { UseQueryOptions, useQuery } from "@tanstack/react-query";
+import { UseQueryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { AxiosError, AxiosResponse } from "axios";
 
 type UseGlobalQueryParameterObjectType<T, K, D> = {
@@ -20,4 +20,17 @@ const useGlobalQuery = <T, K, D = K>({ URL, key, params, options, segment }: Use
   return { ...res };
 };
 
-export { useGlobalQuery };
+
+
+const useGlobalSuspenseQuery = <T, K, D = K>({ URL, key, params, options, segment }: UseGlobalQueryParameterObjectType<T, K, D>) => {
+  const res = useSuspenseQuery<AxiosResponse<K>, AxiosError, D>({
+    queryKey: params ? [key, params] : [key],
+    queryFn: () => api.get(!segment ? URL : `${URL}/${segment}`, params && { params }),
+    select: (data) => data.data,
+    ...options,
+  } as UseQueryOptions<AxiosResponse<K>, AxiosError, D>);
+  return { ...res };
+};
+
+
+export { useGlobalQuery, useGlobalSuspenseQuery };
