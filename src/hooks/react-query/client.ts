@@ -9,6 +9,7 @@ export const queryClient = new QueryClient({
   },
   queryCache: new QueryCache({
     onError: (error) => {
+      console.log("react-query error", error);
       return error;
     },
   }),
