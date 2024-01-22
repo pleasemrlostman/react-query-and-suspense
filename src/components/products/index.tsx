@@ -9,7 +9,7 @@ const Products = () => {
 
   return (
     <div className="flex flex-col items-start justify-start gap-4">
-      {data?.map((value) => {
+      {data.map((value) => {
         return (
           <div key={value.id} className="flex items-center gap-4">
             <img

@@ -159,6 +159,12 @@ export default ErrorBannerFallback;
 
 그리고 모든 컴포넌트 마다 이러한 로직을 추가해줘야 했는데 `ErrorBoundary` 컴포넌트를 이용해서 이러한 로직을 쉽게 구현할 수 있는것 같다.
 
+### 보완점
+
+[카카오페이 디벨로퍼 블로그 글](https://tech.kakaopay.com/post/react-query-2/)을 참조해보면 에러를 분기처리하여 특정한 에러일 경우 해당 컴포넌트 자리에서 `fallback UI`를 노출시켜주는 것이 아닌 더 상단의 `ErrorBoundary`로 에러를 보내 상위 `ErrorBoundary`에서 에러를 처리할 수 있게 작성했다.
+
+카카오페이 같은 경우 `RetryErrorBoundary`와 `CriticalErrorBoundary` 컴포넌트를 만들어서 해당 기능을 완성시켰는데 본인 역시 비슷한 로직으로 해당 기능을 작성해봐야겠다.
+
 ## 이슈
 
 ### 갑작스러운 502 Error
