@@ -1,8 +1,8 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 
 const config = {
-  // baseURL: import.meta.env.VITE_FAKE_JSON_STORE_URL,
-  baseURL: "https://sdsdsds",
+  baseURL: import.meta.env.VITE_FAKE_JSON_STORE_URL,
+  // baseURL: "https://sdsdsds",
 };
 
 const api = axios.create(config);

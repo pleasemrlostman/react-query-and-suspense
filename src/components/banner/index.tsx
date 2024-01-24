@@ -12,7 +12,7 @@ import {
 const Banner = () => {
   const { data } = useSuspenseQuery<AxiosResponse, AxiosError, BannerImage[]>({
     queryKey: ["banner-picture"],
-    queryFn: () => axios.get("https://picsum.---photos/v2/list"),
+    queryFn: () => axios.get("https://picsum.photos/v2/list"),
     select: (data) => data.data,
   });
 

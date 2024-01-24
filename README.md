@@ -165,12 +165,71 @@ export default ErrorBannerFallback;
 
 카카오페이 같은 경우 `RetryErrorBoundary`와 `CriticalErrorBoundary` 컴포넌트를 만들어서 해당 기능을 완성시켰는데 본인 역시 비슷한 로직으로 해당 기능을 작성해봐야겠다.
 
+### Refactor
+
+에러가 발생했을 때 재시도를 통해서 다시 한번 API 응답을 받을 수 있는 상황과, 서버 자체의 오류 및 서버 점검으로 인해서 화면에 재시도할 수 있는 UI가 아닌 즉 특정 화면을 아예 덮어 버려야하는 두가지 상황을 가정해보겠다.
+
+전자의 경우에는 해당 에러 발생시 API를 재요청할 수 있는 UI가 필요하므로 해당 기능을 수행하는 에러바운더리를 리턴하는 `RetryErrorBoundary`라는 컴포넌트를 제작 했다.
+
+```tsx
+const RetryErrorBoundary = ({ children }: PropsWithChildren) => {
+  const { reset } = useQueryErrorResetBoundary();
+  return (
+    <ErrorBoundary
+      onReset={reset}
+      fallbackRender={(props) => <ErrorFallbackComponent {...props} />}
+      onError={(props) => {
+        const error = props as AxiosError;
+        console.log("props", error.code);
+        if (error.message === "Network Error") {
+          throw error;
+        }
+      }}
+    >
+      {children}
+    </ErrorBoundary>
+  );
+};
+```
+
+전자의 경우 `ErrorBoundary`의 하위 컴포넌트에서 에러가 발생했을하면 해당 에러가 `onError`의 콜백함수의 인자로 들어온다.
+
+해당 콜백함수에서 특정 에러에대한 처리를 해주면 된다. 현재 해당 코드는 `error`의 `message`가 **Network Error** 이면 `error`을 `throw`하여 상위 `ErrorBoundary` 로 넘겨준다.
+
+`throw` 된 `error`는 상위 에러 바운더리로 이동한다.
+
+> 해당 코드는 아래의 `CriticalErrorBoundary` 참조
+
+후자의 경우 전체화면을 덮어버리는 UI를 노출시키는 `CriticalErrorBoundary` 컴포넌트를 생성했다.
+
+```tsx
+const CriticalErrorBoundary = ({ children }: PropsWithChildren) => {
+  const { reset } = useQueryErrorResetBoundary();
+  return (
+    <ErrorBoundary
+      onReset={reset}
+      fallbackRender={() => <CriticalErrorFallbackComponent />}
+      onError={(props) => {
+        const error = props as AxiosError;
+        if (error.message !== "Network Error") {
+          throw error;
+        }
+      }}
+    >
+      {children}
+    </ErrorBoundary>
+  );
+};
+```
+
+`CriticalErrorBoundary`는 가장 상단에 있는 `ErrorBoundary`로서 서버 이슈와 같은 문제로 해당 App 전체에 문제가 생길때 `CriticalErrorFallbackComponent` 컴포넌트를 이용해 해당 컴포넌트를 렌더링 시킨다.
+
 ## 이슈
 
 ### 갑작스러운 502 Error
 
 잘 작동하던 `fakeStore` 가 갑자기 502에러가 발생했다. 아마도 `api` 자체에서 이슈가 생긴 이슈인데 강제적으로 내가 발생 시킨 `4xx` 에러만 처리할 수 있었는데 오히려 `5xx` 서버측 에러를 컨트롤 해볼 수 있는 좋은 기회가 생겼다.
 
-```
+### 에러메시지 분기처리
 
-```
+해당 api에서는 에러가 분기처리가 안돼있어 전부 동일한 에러상태를 받아서 다양한 에러코드로 테스트를 진행하지 못한 아쉬움이 있다. 빨리 간단한 back서버를 만들어서 테스트 환경을 구축할 수 있는 능력을 길러야겠다.
